@@ -13,7 +13,7 @@
 <br/>
 **OmniBar Backport for Project Ascension**
 
-[⬇ **Download Latest**](https://github.com/Xurkon/PA-OmniCD/releases/latest) &nbsp;&nbsp;•&nbsp;&nbsp; [📂 **View Source**](https://github.com/Xurkon/PA-OmniCD) &nbsp;&nbsp;•&nbsp;&nbsp; [📖 **Read Documentation**](https://xurkon.github.io/PA-OmniCD/)
+[⬇ **Download Latest**](https://github.com/Xurkon/PA-Omnibar/releases/latest) &nbsp;&nbsp;•&nbsp;&nbsp; [📂 **View Source**](https://github.com/Xurkon/PA-Omnibar) &nbsp;&nbsp;•&nbsp;&nbsp; [📖 **Read Documentation**](https://xurkon.github.io/PA-Omnibar/)
 
 </div>
 
@@ -33,7 +33,7 @@ OmniBar tracks enemy cooldowns. Backported to 3.3.5a for Project Ascension.
 3. Restart WoW.
 
 ## Documentation
-See [docs](docs/index.html) or visit the [GitHub Pages](https://xurkon.github.io/PA-OmniCD/).
+See [docs](docs/index.html) or visit the [GitHub Pages](https://xurkon.github.io/PA-Omnibar/).
 
 ## Credits
 - Original Author: Jamba
