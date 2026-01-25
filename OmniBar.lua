@@ -4,39 +4,24 @@
 -- There might be some wrong cooldowns/timers, you're welcome to change it yourself, under the table "cooldowns" around line 56. Should be self-explanatory. Eg: 
 -- 	[26297]   = { default = true, duration = 180,  class = "GENERAL" },                                       --Berserking        // 26297 is Berserking Spell ID, duration is the cooldown duration.
 
--- Polyfill for tcopy
-local function tcopy(t)
-	local u = {}
-	for k, v in pairs(t) do
-		if type(v) == "table" then
-			u[k] = tcopy(v)
-		else
-			u[k] = v
-		end
-	end
-	return u
-end
-
--- Polyfill for Enum
-local Enum = {}
-Enum.Class = {}
-Enum.ClassFile = {}
+local classTable = {}
+local classNameToID = {}
 local classID = 1
 while true do
 	local localized, file, id = GetClassInfo(classID)
 	if not file then break end
-	Enum.Class[file] = id
-	Enum.ClassFile[id] = file
+	classTable[id] = file
+	classNameToID[file] = id
 	classID = classID + 1
 end
-local MAX_CLASSES = classID - 1
-if not Enum.Class.HERO then Enum.Class.HERO = 99 end
 
-local classTable = tcopy(Enum.ClassFile)
+local MAX_CLASSES = classID - 1
+if not classNameToID["HERO"] then classNameToID["HERO"] = 99 end
+
 tinsert(classTable, "GENERAL")
 
 local specTable = {
-	[Enum.Class.HERO] = { "HERO" }
+	[classNameToID["HERO"]] = { "HERO" }
 }
 
 if not LOCALIZED_CLASS_SPEC_NAMES then -- remove when added to patches
@@ -200,10 +185,12 @@ if not LOCALIZED_CLASS_SPEC_NAMES then -- remove when added to patches
 end
 
 for class, specs in pairs(LOCALIZED_CLASS_SPEC_NAMES) do
-	local classID = Enum.Class[class]
-	specTable[classID] = {}
-	for spec in pairs(specs) do
-		tinsert(specTable[classID], spec)
+	local classID = classNameToID[class]
+	if classID then
+		specTable[classID] = {}
+		for spec in pairs(specs) do
+			tinsert(specTable[classID], spec)
+		end
 	end
 end
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.1] - 2026-01-25
+### Changed
+- Refactored codebase to use native 3.3.5a/Ascension APIs instead of polyfilling `Enum` and `tcopy`.
+- Replaced `Enum` table construction with direct `GetClassInfo` iteration and a local lookup table.
+- Removed unused `tcopy` deep copy function.
+
 ## [1.4.0] - 2026-01-25
 ### Changed
 - Removed dependency on `!!!ClassicAPI` backport library.
