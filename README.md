@@ -24,7 +24,7 @@ We need players to help test this in various combat scenarios:
 - **Battlegrounds**: Ensure performance remains high in large-scale PvP.
 - **World PvP**: Confirm tracking works in the open world.
 
-**Please report any Lua errors or issues where cooldowns do not appear correctly on our GitHub Issues page.**
+**Please report any Lua errors or issues where cooldowns do not appear correctly on my GitHub Issues page.**
 
 ## Documentation
 
