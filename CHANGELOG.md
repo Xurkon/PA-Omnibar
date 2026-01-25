@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.3] - 2026-01-25
+### Changed
+- Added robustness checks to `GetNumSpecializationsForClassID` and `GetSpecializationInfoForClassID`.
+    - These functions now gracefully return `0` or `nil` instead of crashing if called with an invalid `classID` (e.g., if a class is present in configuration but missing from the current realm).
+    - This improves compatibility across different Project Ascension realms (e.g., Bronzebeard which has 9 classes vs. Classless realms).
+
 ## [1.4.2] - 2026-01-25
 ### Fixed
 - Fixed a regression introduced in v1.4.1 where custom Ascension classes were not being correctly added to the sort order table. This could cause Lua errors during sorting (e.g., in `/ob test`), leading to the anchor frame getting stuck to the mouse cursor.

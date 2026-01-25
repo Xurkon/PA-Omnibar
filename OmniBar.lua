@@ -199,10 +199,12 @@ local function GetClassInfoByID(classID)
 end
 
 local function GetNumSpecializationsForClassID(classID)
+	if not classID or not specTable[classID] then return 0 end
 	return #specTable[classID];
 end
 
 local function GetSpecializationInfoForClassID(classID, i)
+	if not classID or not specTable[classID] then return end
 	return (classID-1)*3+i, specTable[classID][i];
 end
 
