@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.4.2] - 2026-01-25
+### Fixed
+- Fixed a regression introduced in v1.4.1 where custom Ascension classes were not being correctly added to the sort order table. This could cause Lua errors during sorting (e.g., in `/ob test`), leading to the anchor frame getting stuck to the mouse cursor.
+- Hardened the `OmniBar_Position` sort function to prevent crashes if a class is missing from the order table.
+
 ## [1.4.1] - 2026-01-25
 ### Changed
 - Refactored codebase to use native 3.3.5a/Ascension APIs instead of polyfilling `Enum` and `tcopy`.

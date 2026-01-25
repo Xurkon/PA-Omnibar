@@ -483,9 +483,22 @@ end
 
  
 local order = {}
-order["GENERAL"] = 1
-for index, class in ipairs(CLASS_SORT_ORDER) do
-	order[class] = index + 1
+local orderCount = 1
+order["GENERAL"] = orderCount
+orderCount = orderCount + 1
+
+if CLASS_SORT_ORDER then
+	for index, class in ipairs(CLASS_SORT_ORDER) do
+		order[class] = orderCount
+		orderCount = orderCount + 1
+	end
+end
+
+for class, _ in pairs(classNameToID) do
+	if not order[class] then
+		order[class] = orderCount
+		orderCount = orderCount + 1
+	end
 end
 
 local resets = {
@@ -1242,7 +1255,9 @@ function OmniBar_Position(self)
 				if x < y then return true end
 				if x == y then return a.spellID < b.spellID end
 			end
-			return order[a.class] < order[b.class]
+			local orderA = order[a.class] or 100
+			local orderB = order[b.class] or 100
+			return orderA < orderB
 		end)
 	else
 		-- if we aren't showing unused, just sort by added time
