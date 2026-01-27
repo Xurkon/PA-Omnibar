@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniBar - Project Ascension</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent-gold: #f0b132;
+            --accent-blue: #58a6ff;
+            --border-color: #30363d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .hero {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--accent-gold), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn {
+            display: inline-block;
+            background: var(--accent-blue);
+            color: #fff;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            flex: 1;
+        }
+        h2 { color: var(--accent-gold); margin-bottom: 1rem; font-size: 1.5rem; }
+        p, li { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+        ul { margin-left: 1.5rem; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <h1>OmniBar</h1>
+        <p>Enemy cooldown tracking for Project Ascension</p>
+        <a href="https://github.com/Xurkon/PA-Omnibar/releases/latest" class="btn">Download Latest Release</a>
+    </header>
+    <main class="container">
+        <section>
+            <h2>Installation</h2>
+            <ol style="margin-left: 1.5rem; color: var(--text-secondary);">
+                <li>Download <code>OmniBar.zip</code> from the release page.</li>
+                <li>Extract the zip file.</li>
+                <li>Move <code>OmniBar</code> and <code>OmniBar_Options</code> to <code>Where/Interface/AddOns/</code>.</li>
+            </ol>
+        </section>
+        
+        <section>
+            <h2>Features</h2>
+            <ul>
+                <li>Tracks cooldowns on Nameplates</li>
+                <li>Customizable standalone bar</li>
+                <li>Native Ascension API support</li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>
