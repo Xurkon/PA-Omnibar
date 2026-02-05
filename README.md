@@ -39,9 +39,10 @@
 
 ## 📥 Installation
 
-1. Download the addon.
+1. Download the latest release.
 2. Extract the `OmniBar` folder to your `Interface\AddOns` directory.
-3. Reload your UI (`/reload`).
+3. **IMPORTANT:** Ensure the folder is named `OmniBar` (case-sensitive) to match the `.toc` file.
+4. Reload your UI (`/reload`).
 
 ## 🔧 Usage
 
