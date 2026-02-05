@@ -1,16 +1,19 @@
 <div align="center">
 
-# OmniBar (Ascension Edition)
+# PA-Omnibar
 
 ![Version](https://img.shields.io/badge/version-v1.3.0-blue.svg?style=for-the-badge)
+![Downloads](https://img.shields.io/github/downloads/Xurkon/PA-Omnibar/total?style=for-the-badge&color=e67e22)
 [![Documentation](https://img.shields.io/badge/Documentation-View%20Docs-58a6ff?style=for-the-badge)](docs/index.html)
+[![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/Xurkon)
+[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.me/Xurkon)
+![License](https://img.shields.io/github/license/Xurkon/PA-Omnibar?style=for-the-badge&color=2980b9)
 ![Platform](https://img.shields.io/badge/PLATFORM-WotLK%203.3.5a-blue?style=for-the-badge&logo=windows&logoColor=white)
-![License](https://img.shields.io/badge/LICENSE-MIT-green?style=for-the-badge)
 
 <br/>
 **Advanced Enemy Cooldown Tracker for Project Ascension**
 
-[📂 **View Source**](https://github.com/Ascension-Addons/OmniBar) &nbsp;&nbsp;•&nbsp;&nbsp; [📖 **Read Documentation**](docs/index.html)
+[⬇ **Download Latest**](https://github.com/Xurkon/PA-Omnibar/releases/latest) &nbsp;&nbsp;•&nbsp;&nbsp; [📂 **View Source**](https://github.com/Xurkon/PA-Omnibar) &nbsp;&nbsp;•&nbsp;&nbsp; [📖 **Read Documentation**](docs/index.html)
 
 </div>
 
