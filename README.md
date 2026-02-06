@@ -3,7 +3,7 @@
 # PA-Omnibar
 
 ![Version](https://img.shields.io/badge/version-v1.3.0-blue.svg?style=for-the-badge)
-![Downloads](https://img.shields.io/github/downloads/Xurkon/PA-Omnibar/total?style=for-the-badge&label=DOWNLOADS&color=e67e22)
+![Downloads](https://img.shields.io/github/downloads/Xurkon/PA-Omnibar/total?style=for-the-badge&color=e67e22)
 [![Documentation](https://img.shields.io/badge/Documentation-View%20Docs-58a6ff?style=for-the-badge)](docs/index.html)
 [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/Xurkon)
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.me/Xurkon)

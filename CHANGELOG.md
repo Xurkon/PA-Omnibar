@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.0 - Sync and Maintenance
+- **File Sync**: Updated repository with missing local development files.
+- **Version Bump**: Incremented version to 1.4.0.
+
 ## v1.3.0 - Ascension Compatibility Update
 
 ### 🛠️ Critical Fixes
