@@ -1,0 +1,16 @@
+# Workflow and Agent Files
+workflow/
+.agent/
+.gemini/
+.claude/
+
+# IDE History
+.history/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Backup Files
+*.bak
+*~
