@@ -2,9 +2,9 @@
 
 # PA-Omnibar
 
-![Version](https://img.shields.io/badge/version-v1.3.0-blue.svg?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v1.5.0-blue.svg?style=for-the-badge)
 ![Downloads](https://img.shields.io/github/downloads/Xurkon/PA-Omnibar/total?style=for-the-badge&color=e67e22)
-[![Documentation](https://img.shields.io/badge/Documentation-View%20Docs-58a6ff?style=for-the-badge)](docs/index.html)
+[![Documentation](https://img.shields.io/badge/Documentation-View%20Docs-58a6ff?style=for-the-badge)](https://xurkon.github.io/PA-Omnibar/)
 [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/Xurkon)
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.me/Xurkon)
 ![License](https://img.shields.io/github/license/Xurkon/PA-Omnibar?style=for-the-badge&color=2980b9)
@@ -13,7 +13,7 @@
 <br/>
 **Advanced Enemy Cooldown Tracker for Project Ascension**
 
-[⬇ **Download Latest**](https://github.com/Xurkon/PA-Omnibar/releases/latest) &nbsp;&nbsp;•&nbsp;&nbsp; [📂 **View Source**](https://github.com/Xurkon/PA-Omnibar) &nbsp;&nbsp;•&nbsp;&nbsp; [📖 **Read Documentation**](docs/index.html)
+[⬇ **Download Latest**](https://github.com/Xurkon/PA-Omnibar/releases/latest) &nbsp;&nbsp;•&nbsp;&nbsp; [📂 **View Source**](https://github.com/Xurkon/PA-Omnibar) &nbsp;&nbsp;•&nbsp;&nbsp; [📖 **Read Documentation**](https://xurkon.github.io/PA-Omnibar/)
 
 </div>
 
@@ -55,12 +55,10 @@
 
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
-### v1.3.0 - Ascension Compatibility Patch
-- **FIXED**: Critical initialization errors "OmniBar has already been added".
-- **FIXED**: "Unknown addon chat type" error when playing solo.
-- **ADDED**: Name-based spell detection for Ascension custom spells.
-- **FIXED**: ElvUI Enhanced compatibility (nil table error).
-- **FIXED**: Removed misleading "Hold SHIFT" text from tooltips.
+### v1.5.0 - Combat Log Spec Detection
+- **ADDED**: Advanced combat log-based spec detection for arena/PvP.
+- **ADDED**: 130+ spell/buff-to-spec mappings for accurate spec identification.
+- **FIXED**: "Unknown addon chat type" error when not in a guild.
 
 ## 👥 Credits
 

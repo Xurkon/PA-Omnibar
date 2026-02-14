@@ -1010,106 +1010,108 @@ local customSpells = {
 	},
 }
 
-if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and GetSpecializationInfoByID then
 	for i = 1, #specIDs do
 		local specID = specIDs[i]
 		local _, name, _, icon = GetSpecializationInfoByID(specID)
-		customSpellInfo["spec" .. specID] = {
-			name = format("|T%s:20|t %s", icon, name),
-			hidden = function(info)
-				local spellId = info[#info - 1]
-				spellId = tonumber(spellId)
-				local specID = info[#info]:gsub("spec", "")
-				specID = tonumber(specID)
-				if not specID then return end
-				if OmniBar.db.global.cooldowns[spellId].class ~= select(6, GetSpecializationInfoByID(specID)) then return true end
-			end,
-			desc = "",
-			type = "group",
-			args = {
-				enabled = {
-					name = L["Enabled"],
-					desc = L["Enable the cooldown for this specialization"],
-					type = "toggle",
-					order = 1,
-					get = function(info)
-						local option = info[#info]
-						local spellId = info[#info - 2]
-						spellId = tonumber(spellId)
-						local specID = info[#info - 1]:gsub("spec", "")
-						specID = tonumber(specID)
-						if not OmniBar.db.global.cooldowns[spellId].specID then return true end
-						for i = 1, #OmniBar.db.global.cooldowns[spellId].specID do
-							if OmniBar.db.global.cooldowns[spellId].specID[i] == specID then return true end
-						end
-						return false
-					end,
-					set = function(info, state)
-						local option = info[#info]
-						local spellId = info[#info - 2]
-						spellId = tonumber(spellId)
-						local specID = info[#info - 1]:gsub("spec", "")
-						specID = tonumber(specID)
+		if name and icon then
+			customSpellInfo["spec" .. specID] = {
+				name = format("|T%s:20|t %s", icon, name),
+				hidden = function(info)
+					local spellId = info[#info - 1]
+					spellId = tonumber(spellId)
+					local specID = info[#info]:gsub("spec", "")
+					specID = tonumber(specID)
+					if not specID then return end
+					if OmniBar.db.global.cooldowns[spellId].class ~= select(6, GetSpecializationInfoByID(specID)) then return true end
+				end,
+				desc = "",
+				type = "group",
+				args = {
+					enabled = {
+						name = L["Enabled"],
+						desc = L["Enable the cooldown for this specialization"],
+						type = "toggle",
+						order = 1,
+						get = function(info)
+							local option = info[#info]
+							local spellId = info[#info - 2]
+							spellId = tonumber(spellId)
+							local specID = info[#info - 1]:gsub("spec", "")
+							specID = tonumber(specID)
+							if not OmniBar.db.global.cooldowns[spellId].specID then return true end
+							for i = 1, #OmniBar.db.global.cooldowns[spellId].specID do
+								if OmniBar.db.global.cooldowns[spellId].specID[i] == specID then return true end
+							end
+							return false
+						end,
+						set = function(info, state)
+							local option = info[#info]
+							local spellId = info[#info - 2]
+							spellId = tonumber(spellId)
+							local specID = info[#info - 1]:gsub("spec", "")
+							specID = tonumber(specID)
 
-						-- check all specs first
-						if not OmniBar.db.global.cooldowns[spellId].specID then
-							OmniBar.db.global.cooldowns[spellId].specID = {}
-							for i = 1, #specIDs do
-								if OmniBar.db.global.cooldowns[spellId].class == select(6, GetSpecializationInfoByID(specIDs[i])) then
-									table.insert(OmniBar.db.global.cooldowns[spellId].specID, specIDs[i])
+							-- check all specs first
+							if not OmniBar.db.global.cooldowns[spellId].specID then
+								OmniBar.db.global.cooldowns[spellId].specID = {}
+								for i = 1, #specIDs do
+									if OmniBar.db.global.cooldowns[spellId].class == select(6, GetSpecializationInfoByID(specIDs[i])) then
+										table.insert(OmniBar.db.global.cooldowns[spellId].specID, specIDs[i])
+									end
 								end
 							end
-						end
 
-						-- then remove if we unchecked
-						for i = #OmniBar.db.global.cooldowns[spellId].specID, 1, -1 do
-							if not state and OmniBar.db.global.cooldowns[spellId].specID[i] == specID then
-								table.remove(OmniBar.db.global.cooldowns[spellId].specID, i)
-								break
+							-- then remove if we unchecked
+							for i = #OmniBar.db.global.cooldowns[spellId].specID, 1, -1 do
+								if not state and OmniBar.db.global.cooldowns[spellId].specID[i] == specID then
+									table.remove(OmniBar.db.global.cooldowns[spellId].specID, i)
+									break
+								end
 							end
-						end
 
-						-- add if we checked it
-						if state then
-							table.insert(OmniBar.db.global.cooldowns[spellId].specID, specID)
-						end
+							-- add if we checked it
+							if state then
+								table.insert(OmniBar.db.global.cooldowns[spellId].specID, specID)
+							end
 
-						OmniBar:AddCustomSpells()
-					end,
+							OmniBar:AddCustomSpells()
+						end,
 
+					},
+					duration = {
+						name = L["Duration"],
+						desc = L["Set the duration of the cooldown"],
+						type = "range",
+						min = 1,
+						softMax = 600,
+						step = 1,
+						order = 2,
+						set = function(info, state)
+							local option = info[#info]
+							local spellId = info[#info - 2]
+							spellId = tonumber(spellId)
+							local specID = info[#info - 1]:gsub("spec", "")
+							specID = tonumber(specID)
+							if state == OmniBar.db.global.cooldowns[spellId].duration.default then
+								state = nil
+							end
+							OmniBar.db.global.cooldowns[spellId].duration[specID] = state
+							OmniBar:AddCustomSpells()
+						end,
+						get = function(info)
+							local option = info[#info]
+							local spellId = info[#info - 2]
+							spellId = tonumber(spellId)
+							local specID = info[#info - 1]:gsub("spec", "")
+							specID = tonumber(specID)
+							return OmniBar.db.global.cooldowns[spellId].duration[specID] or
+								OmniBar.db.global.cooldowns[spellId].duration.default
+						end,
+					},
 				},
-				duration = {
-					name = L["Duration"],
-					desc = L["Set the duration of the cooldown"],
-					type = "range",
-					min = 1,
-					softMax = 600,
-					step = 1,
-					order = 2,
-					set = function(info, state)
-						local option = info[#info]
-						local spellId = info[#info - 2]
-						spellId = tonumber(spellId)
-						local specID = info[#info - 1]:gsub("spec", "")
-						specID = tonumber(specID)
-						if state == OmniBar.db.global.cooldowns[spellId].duration.default then
-							state = nil
-						end
-						OmniBar.db.global.cooldowns[spellId].duration[specID] = state
-						OmniBar:AddCustomSpells()
-					end,
-					get = function(info)
-						local option = info[#info]
-						local spellId = info[#info - 2]
-						spellId = tonumber(spellId)
-						local specID = info[#info - 1]:gsub("spec", "")
-						specID = tonumber(specID)
-						return OmniBar.db.global.cooldowns[spellId].duration[specID] or
-							OmniBar.db.global.cooldowns[spellId].duration.default
-					end,
-				},
-			},
-		}
+			}
+		end
 	end
 end
 

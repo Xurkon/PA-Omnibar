@@ -41,20 +41,235 @@ local ClearInspectPlayer = ClearInspectPlayer
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local CreateFrame = CreateFrame
 local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
-local GetArenaOpponentSpec = GetArenaOpponentSpec
+-- [Shim] Missing Retail API functions for 3.3.5a compatibility
+local GetArenaOpponentSpec = GetArenaOpponentSpec or function() return nil end
+local GetNumSpecializationsForClassID = GetNumSpecializationsForClassID or function() return 0 end
+local GetSpecializationInfoForClassID = GetSpecializationInfoForClassID or function() return nil end
+local GetSpecializationInfoByID = GetSpecializationInfoByID or function() return nil end
+
+-- [3.3.5a] Talent tree to spec name mapping
+local TALENT_TREE_TO_SPEC = {
+	PRIEST = { "Discipline", "Holy", "Shadow" },
+	WARLOCK = { "Affliction", "Demonology", "Destruction" },
+	HUNTER = { "Beast Mastery", "Marksmanship", "Survival" },
+	MAGE = { "Arcane", "Fire", "Frost" },
+	WARRIOR = { "Arms", "Fury", "Protection" },
+	PALADIN = { "Holy", "Protection", "Retribution" },
+	DRUID = { "Balance", "Feral Combat", "Restoration" },
+	SHAMAN = { "Elemental", "Enhancement", "Restoration" },
+	ROGUE = { "Assassination", "Combat", "Subtlety" },
+	DEATHKNIGHT = { "Blood", "Frost", "Unholy" },
+}
+
+-- [3.3.5a] Spell name to spec mapping (from Gladdy)
+-- These spells indicate which spec the caster is using
+local SPEC_SPELLS = {
+	-- WARRIOR
+	[GetSpellInfo(47486)] = "Arms",    -- Mortal Strike
+	[GetSpellInfo(46924)] = "Arms",    -- Bladestorm
+	[GetSpellInfo(23881)] = "Fury",    -- Bloodthirst
+	[GetSpellInfo(12809)] = "Protection", -- Concussion Blow
+	[GetSpellInfo(47498)] = "Protection", -- Devastate
+	[GetSpellInfo(46968)] = "Protection", -- Shockwave
+
+	-- PALADIN
+	[GetSpellInfo(48827)] = "Protection", -- Avenger's Shield
+	[GetSpellInfo(48825)] = "Holy",     -- Holy Shock
+	[GetSpellInfo(53563)] = "Holy",     -- Beacon of Light
+	[GetSpellInfo(35395)] = "Retribution", -- Crusader Strike
+	[GetSpellInfo(66006)] = "Retribution", -- Divine Storm
+
+	-- ROGUE
+	[GetSpellInfo(48666)] = "Assassination", -- Mutilate
+	[GetSpellInfo(14177)] = "Assassination", -- Cold Blood
+	[GetSpellInfo(51690)] = "Combat",     -- Killing Spree
+	[GetSpellInfo(13877)] = "Combat",     -- Blade Flurry
+	[GetSpellInfo(36554)] = "Subtlety",   -- Shadowstep
+	[GetSpellInfo(51713)] = "Subtlety",   -- Shadow Dance
+
+	-- PRIEST
+	[GetSpellInfo(53007)] = "Discipline", -- Penance
+	[GetSpellInfo(10060)] = "Discipline", -- Power Infusion
+	[GetSpellInfo(33206)] = "Discipline", -- Pain Suppression
+	[GetSpellInfo(34861)] = "Holy",    -- Circle of Healing
+	[GetSpellInfo(15487)] = "Shadow",  -- Silence
+	[GetSpellInfo(48160)] = "Shadow",  -- Vampiric Touch
+
+	-- DEATHKNIGHT
+	[GetSpellInfo(55262)] = "Blood", -- Heart Strike
+	[GetSpellInfo(49203)] = "Frost", -- Hungering Cold
+	[GetSpellInfo(55268)] = "Frost", -- Frost Strike
+	[GetSpellInfo(51411)] = "Frost", -- Howling Blast
+	[GetSpellInfo(55271)] = "Unholy", -- Scourge Strike
+
+	-- MAGE
+	[GetSpellInfo(44781)] = "Arcane", -- Arcane Barrage
+	[GetSpellInfo(55360)] = "Fire", -- Living Bomb
+	[GetSpellInfo(42950)] = "Fire", -- Dragon's Breath
+	[GetSpellInfo(44572)] = "Frost", -- Deep Freeze
+
+	-- WARLOCK
+	[GetSpellInfo(59164)] = "Affliction", -- Haunt
+	[GetSpellInfo(47843)] = "Affliction", -- Unstable Affliction
+	[GetSpellInfo(59672)] = "Demonology", -- Metamorphosis
+	[GetSpellInfo(47193)] = "Demonology", -- Demonic Empowerment
+	[GetSpellInfo(59172)] = "Destruction", -- Chaos Bolt
+	[GetSpellInfo(47847)] = "Destruction", -- Shadowfury
+
+	-- SHAMAN
+	[GetSpellInfo(59159)] = "Elemental", -- Thunderstorm
+	[GetSpellInfo(16166)] = "Elemental", -- Elemental Mastery
+	[GetSpellInfo(51533)] = "Enhancement", -- Feral Spirit
+	[GetSpellInfo(30823)] = "Enhancement", -- Shamanistic Rage
+	[GetSpellInfo(17364)] = "Enhancement", -- Stormstrike
+	[GetSpellInfo(61301)] = "Restoration", -- Riptide
+
+	-- HUNTER
+	[GetSpellInfo(19577)] = "Beast Mastery", -- Intimidation
+	[GetSpellInfo(34490)] = "Marksmanship", -- Silencing Shot
+	[GetSpellInfo(53209)] = "Marksmanship", -- Chimera Shot
+	[GetSpellInfo(60053)] = "Survival",   -- Explosive Shot
+	[GetSpellInfo(49012)] = "Survival",   -- Wyvern Sting
+
+	-- DRUID
+	[GetSpellInfo(53201)] = "Balance",   -- Starfall
+	[GetSpellInfo(61384)] = "Balance",   -- Typhoon
+	[GetSpellInfo(48566)] = "Feral Combat", -- Mangle (Cat)
+	[GetSpellInfo(48564)] = "Feral Combat", -- Mangle (Bear)
+	[GetSpellInfo(18562)] = "Restoration", -- Swiftmend
+	[GetSpellInfo(53251)] = "Restoration", -- Wild Growth
+	[GetSpellInfo(33891)] = "Restoration", -- Tree of Life
+}
+
+-- [3.3.5a] Buff/debuff name to spec mapping (from Gladdy)
+-- These auras indicate which spec the unit has
+local SPEC_BUFFS = {
+	-- WARRIOR
+	[GetSpellInfo(56638)] = "Arms",    -- Taste for Blood
+	[GetSpellInfo(52437)] = "Arms",    -- Sudden Death
+	[GetSpellInfo(56112)] = "Fury",    -- Furious Attacks
+	[GetSpellInfo(50227)] = "Protection", -- Sword and Board
+
+	-- PALADIN
+	[GetSpellInfo(20375)] = "Retribution", -- Seal of Command
+	[GetSpellInfo(59578)] = "Retribution", -- The Art of War
+	[GetSpellInfo(31836)] = "Holy",     -- Light's Grace
+	[GetSpellInfo(54149)] = "Holy",     -- Infusion of Light
+
+	-- ROGUE
+	[GetSpellInfo(36554)] = "Subtlety",   -- Shadowstep
+	[GetSpellInfo(51713)] = "Subtlety",   -- Shadow Dance
+	[GetSpellInfo(31665)] = "Subtlety",   -- Master of Subtlety
+	[GetSpellInfo(51690)] = "Combat",     -- Killing Spree
+	[GetSpellInfo(13877)] = "Combat",     -- Blade Flurry
+	[GetSpellInfo(14177)] = "Assassination", -- Cold Blood
+
+	-- PRIEST
+	[GetSpellInfo(47788)] = "Holy",    -- Guardian Spirit
+	[GetSpellInfo(52800)] = "Discipline", -- Borrowed Time
+	[GetSpellInfo(47930)] = "Discipline", -- Grace
+	[GetSpellInfo(47753)] = "Discipline", -- Divine Aegis
+	[GetSpellInfo(15473)] = "Shadow",  -- Shadowform
+	[GetSpellInfo(15286)] = "Shadow",  -- Vampiric Embrace
+
+	-- DEATHKNIGHT
+	[GetSpellInfo(49222)] = "Unholy", -- Bone Shield
+	[GetSpellInfo(49016)] = "Blood", -- Hysteria
+	[GetSpellInfo(55610)] = "Frost", -- Imp. Icy Talons
+
+	-- MAGE
+	[GetSpellInfo(43039)] = "Frost", -- Ice Barrier
+	[GetSpellInfo(74396)] = "Frost", -- Fingers of Frost
+	[GetSpellInfo(11129)] = "Fire", -- Combustion
+	[GetSpellInfo(48108)] = "Fire", -- Hot Streak
+	[GetSpellInfo(31583)] = "Arcane", -- Arcane Empowerment
+
+	-- WARLOCK
+	[GetSpellInfo(30302)] = "Destruction", -- Nether Protection
+	[GetSpellInfo(54277)] = "Destruction", -- Backdraft
+	[GetSpellInfo(47193)] = "Demonology", -- Demonic Empowerment
+	[GetSpellInfo(64371)] = "Affliction", -- Eradication
+
+	-- SHAMAN
+	[GetSpellInfo(57663)] = "Elemental", -- Totem of Wrath
+	[GetSpellInfo(51470)] = "Elemental", -- Elemental Oath
+	[GetSpellInfo(49284)] = "Restoration", -- Earth Shield
+	[GetSpellInfo(53390)] = "Restoration", -- Tidal Waves
+	[GetSpellInfo(30809)] = "Enhancement", -- Unleashed Rage
+	[GetSpellInfo(53817)] = "Enhancement", -- Maelstrom Weapon
+
+	-- HUNTER
+	[GetSpellInfo(20895)] = "Beast Mastery", -- Spirit Bond
+	[GetSpellInfo(34471)] = "Beast Mastery", -- The Beast Within
+	[GetSpellInfo(19506)] = "Marksmanship", -- Trueshot Aura
+	[GetSpellInfo(64420)] = "Survival",   -- Sniper Training
+
+	-- DRUID
+	[GetSpellInfo(24932)] = "Feral Combat", -- Leader of the Pack
+	[GetSpellInfo(16975)] = "Feral Combat", -- Predatory Strikes
+	[GetSpellInfo(24907)] = "Balance",   -- Moonkin Aura
+	[GetSpellInfo(24858)] = "Balance",   -- Moonkin Form
+	[GetSpellInfo(48504)] = "Restoration", -- Living Seed
+	[GetSpellInfo(53251)] = "Restoration", -- Wild Growth
+	[GetSpellInfo(33891)] = "Restoration", -- Tree of Life
+}
+
+
+-- [3.3.5a] Get player's current spec based on talent points
+local function GetPlayerSpec()
+	local _, class = UnitClass("player")
+	if not class or not TALENT_TREE_TO_SPEC[class] then return nil end
+
+	local maxPoints = 0
+	local specIndex = 1
+
+	for i = 1, 3 do
+		local _, _, pointsSpent = GetTalentTabInfo(i)
+		if pointsSpent and pointsSpent > maxPoints then
+			maxPoints = pointsSpent
+			specIndex = i
+		end
+	end
+
+	return TALENT_TREE_TO_SPEC[class][specIndex]
+end
+
+-- [3.3.5a] Get inspected unit's spec based on talent points
+local function GetInspectSpec(unit)
+	local _, class = UnitClass(unit)
+	if not class or not TALENT_TREE_TO_SPEC[class] then return nil end
+
+	local maxPoints = 0
+	local specIndex = 1
+
+	for tabIndex = 1, 3 do
+		local pointsSpent = 0
+		local numTalents = GetNumTalents(tabIndex, true)
+
+		for talentIndex = 1, numTalents do
+			local _, _, _, _, currentRank = GetTalentInfo(tabIndex, talentIndex, true)
+			pointsSpent = pointsSpent + (currentRank or 0)
+		end
+
+		if pointsSpent > maxPoints then
+			maxPoints = pointsSpent
+			specIndex = tabIndex
+		end
+	end
+
+	return TALENT_TREE_TO_SPEC[class][specIndex]
+end
+
 local GetBattlefieldScore = GetBattlefieldScore
 local GetClassInfo = GetClassInfo
 local GetInspectSpecialization = GetInspectSpecialization
 local GetNumBattlefieldScores = GetNumBattlefieldScores
 local GetNumGroupMembers = GetNumGroupMembers
-local GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
 local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local GetRaidRosterInfo = GetRaidRosterInfo
 local GetServerTime = GetServerTime
 local GetSpecialization = GetSpecialization
 local GetSpecializationInfo = GetSpecializationInfo
-local GetSpecializationInfoByID = GetSpecializationInfoByID
-local GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
 local GetSpellInfo = GetSpellInfo
 local GetSpellTexture = GetSpellTexture
 local GetTime = GetTime
@@ -183,6 +398,10 @@ local function BuildSpellNameTable()
 	end
 end
 
+function OmniBar:OnProfileChanged()
+	self:OnEnable()
+end
+
 function OmniBar:OnInitialize()
 	-- Build the lookup table on init
 	BuildSpellNameTable()
@@ -286,7 +505,7 @@ function OmniBar:SendVersion(distribution)
 	if (not self.version) or self.version.major == 0 then return end
 	local channel = distribution or GetDefaultCommChannel()
 	if channel then
-		self:SendCommMessage("OmniBarVersion", self.version.string, channel)
+`t`t-- [3.3.5a Fix] Don't send to GUILD if not in a guild`r`n`t`tif channel == "GUILD" and not IsInGuild() then return end`r`n`t`tself:SendCommMessage("OmniBarVersion", self.version.string, channel)
 	end
 end
 
@@ -311,6 +530,12 @@ function OmniBar:OnEnable()
 	if self.index == 1 then
 		self:Initialize("OmniBar1", "OmniBar")
 		self.index = 2
+	end
+
+	-- [3.3.5a] Detect talent changes
+	if not GetSpecializationInfo then
+		self:RegisterEvent("CHARACTER_POINTS_CHANGED")
+		self:RegisterEvent("PLAYER_TALENT_UPDATE")
 	end
 
 	for key, _ in pairs(self.db.profile.bars) do
@@ -633,14 +858,19 @@ local Masque = LibStub and LibStub("Masque", true)
 
 -- create a lookup table to translate spec names into IDs
 local SPEC_ID_BY_NAME
-if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and GetNumSpecializationsForClassID then
 	SPEC_ID_BY_NAME = {}
 	for classID = 1, MAX_CLASSES do
 		local _, classToken = GetClassInfo(classID)
-		SPEC_ID_BY_NAME[classToken] = {}
-		for i = 1, GetNumSpecializationsForClassID(classID) do
-			local id, name = GetSpecializationInfoForClassID(classID, i)
-			SPEC_ID_BY_NAME[classToken][name] = id
+		if classToken then
+			SPEC_ID_BY_NAME[classToken] = {}
+			local numSpecs = GetNumSpecializationsForClassID(classID)
+			for i = 1, numSpecs do
+				local id, name = GetSpecializationInfoForClassID(classID, i)
+				if id and name then
+					SPEC_ID_BY_NAME[classToken][name] = id
+				end
+			end
 		end
 	end
 end
@@ -1001,10 +1231,34 @@ end
 
 -- Ascension Fix: Backport Name-based lookup from TurboDebuffs
 
+-- [3.3.5a] Try to set spec for a unit, validating against class
+function OmniBar:TrySetSpec(sourceGUID, sourceName, spec)
+	if not sourceName or not spec or not sourceGUID then return end
+
+	-- Already detected
+	if self.specs[sourceName] then return end
+
+		-- Get class from GUID
+	local _, class = GetPlayerInfoByGUID(sourceGUID)
+	if not class then return end
+
+	-- Validate spec matches the class
+	local validSpecs = TALENT_TREE_TO_SPEC[class]
+	if not validSpecs then return end
+
+	for _, validSpec in ipairs(validSpecs) do
+		if validSpec == spec then
+			self.specs[sourceName] = spec
+			self:SendMessage("OmniBar_SpecUpdated", sourceName)
+			return
+		end
+	end
+end
 
 function OmniBar:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
 	local _, event, _, sourceGUID, sourceName, sourceFlags, _, _, _, _, _, spellID, spellName =
 		CombatLogGetCurrentEventInfo(...)
+
 	if (event == "SPELL_CAST_SUCCESS" or event == "SPELL_AURA_APPLIED") then
 		-- Fallback to name lookup if ID is not tracked (Ascension support)
 		if (not addon.Cooldowns[spellID]) and spellName and SPELL_ID_BY_NAME[spellName] then
@@ -1012,6 +1266,20 @@ function OmniBar:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
 		end
 
 		if spellID == 0 and SPELL_ID_BY_NAME then spellID = SPELL_ID_BY_NAME[spellName] end
+
+		-- [3.3.5a] Detect spec from spell cast or buff application
+		if sourceName and not GetSpecializationInfo then
+			-- Check if this spell indicates a spec
+			if event == "SPELL_CAST_SUCCESS" and SPEC_SPELLS[spellName] then
+				self:TrySetSpec(sourceGUID, sourceName, SPEC_SPELLS[spellName])
+			end
+
+			-- Check if this buff/debuff indicates a spec
+			if event == "SPELL_AURA_APPLIED" and SPEC_BUFFS[spellName] then
+				self:TrySetSpec(sourceGUID, sourceName, SPEC_BUFFS[spellName])
+			end
+		end
+
 		self:AddSpellCast(event, sourceGUID, sourceName, sourceFlags, spellID)
 	end
 end
@@ -1226,14 +1494,24 @@ function OmniBar_SpecUpdated(self, event, name)
 end
 
 function OmniBar:GetSpecs()
-	if (not GetSpecializationInfo) then return end
+	-- Update player spec
 	if (not self.specs[PLAYER_NAME]) then
-		self.specs[PLAYER_NAME] = GetSpecializationInfo(GetSpecialization())
+		if GetSpecializationInfo then
+			-- Retail API
+			self.specs[PLAYER_NAME] = GetSpecializationInfo(GetSpecialization())
+		else
+			-- 3.3.5a API
+			self.specs[PLAYER_NAME] = GetPlayerSpec()
+		end
 		self:SendMessage("OmniBar_SpecUpdated", PLAYER_NAME)
 	end
+
+	-- Throttle inspect requests
 	if self.lastInspect and GetTime() - self.lastInspect < 3 then
 		return
 	end
+
+	-- Inspect group members
 	for i = 1, GetNumGroupMembers() do
 		local name, _, _, _, _, class = GetRaidRosterInfo(i)
 		if name and (not self.specs[name]) and (not UnitIsUnit("player", name)) and CanInspect(name) then
@@ -1251,15 +1529,42 @@ function OmniBar:INSPECT_READY(event, guid)
 	local unit = self.inspectUnit
 	self.inspectUnit = nil
 	self:UnregisterEvent("INSPECT_READY")
+
 	if (UnitGUID(unit) ~= guid) then
 		ClearInspectPlayer()
 		self:GetSpecs()
 		return
 	end
-	self.specs[unit] = GetInspectSpecialization(unit)
+
+	-- Get spec using appropriate API
+	if GetInspectSpecialization then
+		-- Retail API
+		self.specs[unit] = GetInspectSpecialization(unit)
+	else
+		-- 3.3.5a API
+		self.specs[unit] = GetInspectSpec(unit)
+	end
+
 	self:SendMessage("OmniBar_SpecUpdated", unit)
 	ClearInspectPlayer()
 	self:GetSpecs()
+end
+
+-- [3.3.5a] Talent change detection
+function OmniBar:CHARACTER_POINTS_CHANGED()
+	local newSpec = GetPlayerSpec()
+	if newSpec and newSpec ~= self.specs[PLAYER_NAME] then
+		self.specs[PLAYER_NAME] = newSpec
+		self:SendMessage("OmniBar_SpecUpdated", PLAYER_NAME)
+	end
+end
+
+function OmniBar:PLAYER_TALENT_UPDATE()
+	local newSpec = GetPlayerSpec()
+	if newSpec and newSpec ~= self.specs[PLAYER_NAME] then
+		self.specs[PLAYER_NAME] = newSpec
+		self:SendMessage("OmniBar_SpecUpdated", PLAYER_NAME)
+	end
 end
 
 function OmniBar_IsUnitEnabled(self, info)
@@ -1700,3 +2005,7 @@ SlashCmdList.OmniBar = function()
 	InterfaceOptionsFrame_OpenToCategory("OmniBar")
 	InterfaceOptionsFrame_OpenToCategory("OmniBar")
 end
+
+
+
+
