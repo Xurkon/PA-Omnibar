@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniBar Developer Documentation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #24292e;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f6f8fa;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+        h1, h2, h3 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+        code {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 85%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            overflow: auto;
+            border-radius: 6px;
+        }
+        pre code { background-color: transparent; padding: 0; }
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.4em;
+            font-size: 75%;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.25rem;
+            color: #fff;
+            background-color: #007bff;
+        }
+        .warning { background-color: #ffc107; color: #212529; }
+        .danger { background-color: #dc3545; }
+        .success { background-color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OmniBar Developer Docs <span class="badge">v1.5.0</span></h1>
+        
+        <p>This documentation provides technical details on the OmniBar codebase, specifically tailored for the Project Ascension (3.3.5a) adaptation.</p>
+
+        <h2>📁 Project Structure</h2>
+        <ul>
+            <li><code>OmniBar.lua</code>: Core addon logic, event handling, and initialization.</li>
+            <li><code>Options.lua</code>: AceConfig-3.0 options table and UI generation.</li>
+            <li><code>OmniBar.xml</code>: XML templates for frames and icons.</li>
+            <li><code>OmniBar_*.lua</code>: Expansion-specific spell data (TBC, Wrath, etc.).</li>
+        </ul>
+
+        <h2>🛠️ Core API Shims</h2>
+        <p>To support the 3.3.5a client with modern addon logic, several APIs have been shimmed in <code>OmniBar.lua</code>:</p>
+        
+        <h3>C_PvP & C_Timer</h3>
+        <pre><code>-- C_PvP Shim
+C_PvP = {
+    IsRatedBattleground = function() return false end
+}
+
+-- C_Timer Shim
+C_Timer = {
+    After = function(duration, func) ... end
+}</code></pre>
+
+        <h3>Frame Methods</h3>
+        <p>Missing frame methods like <code>SetClipsChildren</code> and <code>SetSwipeColor</code> have been proactively shimmed safely to prevent nil errors.</p>
+
+        <h2>🔮 Spell Detection Logic</h2>
+        <p>OmniBar on Ascension uses a dual-lookup system for maximum compatibility:</p>
+        <ol>
+            <li><strong>ID Lookup</strong>: Checks <code>addon.Cooldowns[spellID]</code> first.</li>
+            <li><strong>Name Fallback</strong>: If ID fails, checks <code>SPELL_ID_BY_NAME[spellName]</code>.</li>
+        </ol>
+        
+        <div class="alert warning">
+            <strong>Note:</strong> <code>SPELL_ID_BY_NAME</code> is automatically built on initialization by iterating through all registered cooldowns and mapping their names.
+        </div>
+
+        <pre><code>-- Example Fallback Logic
+if (not addon.Cooldowns[spellID]) and spellName and SPELL_ID_BY_NAME[spellName] then
+    spellID = SPELL_ID_BY_NAME[spellName]
+end</code></pre>
+
+        <h2>🐛 Known Issues & Fixes</h2>
+        
+        <h3>"OmniBar has already been added"</h3>
+        <p><span class="badge success">FIXED</span> Caused by duplicate <code>Initialize</code> methods. Removed the custom one in favor of standard <code>OnInitialize</code>.</p>
+
+        <h3>"Unknown addon chat type"</h3>
+        <p><span class="badge success">FIXED</span> Occurs when <code>GetDefaultCommChannel</code> returns nil (Solo). <code>SendVersion</code> now guards against nil channels.</p>
+
+        <h3>ElvUI Compatibility</h3>
+        <p><span class="badge success">FIXED</span> ElvUI Enhanced expected <code>OmniBar.icons</code>. Patched to iterate <code>OmniBar.bars</code> instead.</p>
+
+    </div>
+</body>
+</html>
