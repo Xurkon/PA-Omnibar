@@ -33,7 +33,8 @@ local YES = YES
 local format = format
 local nop = nop
 
-local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
+-- Try to get the addon via GetAddon, fallback to global if needed
+local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar", true) or _G["OmniBar"]
 local L = LibStub("AceLocale-3.0"):GetLocale("OmniBar")
 
 local MAX_ARENA_SIZE = addon.MAX_ARENA_SIZE or 0
