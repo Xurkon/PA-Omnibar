@@ -14,3 +14,7 @@ Thumbs.db
 # Backup Files
 *.bak
 *~
+
+# Release Archives
+*.zip
+Omnibar.zip
