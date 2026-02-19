@@ -520,6 +520,7 @@ function OmniBar:ReceiveVersion(_, payload, _, sender)
 end
 
 function OmniBar:SendVersion(distribution)
+	if distribution == "ZONE_CHANGED_NEW_AREA" then distribution = nil end
 	if (not self.version) or self.version.major == 0 then return end
 	local channel = distribution or GetDefaultCommChannel()
 	if channel then

@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.5.2 - Chat Type Fix
+- **FIXED**: "Unknown addon chat type" error caused by `ZONE_CHANGED_NEW_AREA` event passing its name as a chat channel argument to `SendVersion`.
+
 ## v1.5.1 - Options Loading Fix
 - **FIXED**: Critical issue where `Options.lua` failed to load in 3.3.5a due to missing `WOW_PROJECT_ID` definitions, causing `/omnibar` slash command to fail.
 - **FIXED**: Typo in `Options.lua` variable name.
