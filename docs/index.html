@@ -403,17 +403,38 @@
             <div class="changelog">
                 <h3>v1.5.1 - Options Loading Fix</h3>
                 <ul>
-                    <li>FIXED: Critical issue where Options.lua failed to load in 3.3.5a due to missing WOW_PROJECT_ID
-                        definitions.</li>
+                    <li>FIXED: Critical issue where Options.lua failed to load in 3.3.5a due to missing WOW_PROJECT_ID definitions, causing /omnibar slash command to fail.</li>
                     <li>FIXED: Typo in Options.lua variable name.</li>
-                    <li>FIXED: Syntax errors causing OmniBar to crash on load.</li>
                 </ul>
 
-                <h3 style="margin-top: 20px;">v1.5.0 - Combat Log Spec Detection</h3>
+                <h3 style="margin-top: 20px;">v1.5.0 - Combat Log Spec Detection & Bug Fixes</h3>
+                <h4>🌟 New Features</h4>
                 <ul>
-                    <li>ADDED: Advanced combat log-based spec detection for arena/PvP.</li>
-                    <li>ADDED: 130+ spell/buff-to-spec mappings for accurate spec identification.</li>
-                    <li>FIXED: "Unknown addon chat type" error when not in a guild.</li>
+                    <li><strong>Combat Log Spec Detection</strong>: Implemented advanced spec detection for arena/PvP using combat log event sniffing (adapted from Gladdy addon).
+                        <ul>
+                            <li>Added 130+ spell/buff-to-spec mappings for all classes.</li>
+                            <li>Detects enemy specs from signature spell casts and buff applications.</li>
+                            <li>Enables accurate spec-specific cooldown adjustments in arena without inspection.</li>
+                            <li>Validates detected specs against player class to prevent false positives.</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <h4>🛠️ Bug Fixes</h4>
+                <ul>
+                    <li><strong>Guild Chat Error</strong>: Fixed "Unknown addon chat type" error when not in a guild on certain realms.
+                        <ul>
+                            <li>Added validation to prevent sending addon messages to GUILD channel when not guild member.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4>📝 Technical Details</h4>
+                <ul>
+                    <li>New <code>SPEC_SPELLS</code> table: Maps offensive spells to specs (e.g., Penance → Discipline).</li>
+                    <li>New <code>SPEC_BUFFS</code> table: Maps buffs/debuffs to specs (e.g., Shadowform → Shadow).</li>
+                    <li>New <code>TrySetSpec()</code> function: Validates detected specs using <code>GetPlayerInfoByGUID()</code>.</li>
+                    <li>Enhanced <code>COMBAT_LOG_EVENT_UNFILTERED</code> handler for spec detection on 3.3.5a clients.</li>
                 </ul>
 
                 <h3 style="margin-top: 20px;">v1.4.0 - Sync and Maintenance</h3>
@@ -422,7 +443,7 @@
                     <li>Version Bump: Incremented version to 1.4.0.</li>
                 </ul>
 
-                <h3 style="margin-top: 20px;">v1.3.0 - Ascension Compatibility</h3>
+                <h3 style="margin-top: 20px;">v1.3.0 - Ascension Compatibility From TurboDebuffs</h3>
                 <ul>
                     <li>Initialization Overhaul: Removed duplicate functions causing startup errors.</li>
                     <li>Chat Channel Guard: Fixed errors when sending version checks.</li>
