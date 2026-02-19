@@ -321,9 +321,17 @@
 
         /* Responsive Fixes */
         @media (max-width: 768px) {
-            .hero h1 { font-size: 2.5rem; }
-            .features-grid { grid-template-columns: 1fr; }
-            .commands-list { overflow-x: auto; }
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .commands-list {
+                overflow-x: auto;
+            }
         }
     </style>
 </head>
@@ -355,19 +363,23 @@
             <div class="features-grid">
                 <div class="feature-card">
                     <h3>🌍 Ascension Ready</h3>
-                    <p>Fully compatible with Project Ascension's custom spells. Intelligent name-based fallback ensures tracking works even with custom IDs.</p>
+                    <p>Fully compatible with Project Ascension's custom spells. Intelligent name-based fallback ensures
+                        tracking works even with custom IDs.</p>
                 </div>
                 <div class="feature-card">
                     <h3>⚔️ PvP Dominance</h3>
-                    <p>Track enemy interrupts, defensives, and offensive cooldowns in real-time. Automatically adjust visibility for Arena and BGs.</p>
+                    <p>Track enemy interrupts, defensives, and offensive cooldowns in real-time. Automatically adjust
+                        visibility for Arena and BGs.</p>
                 </div>
                 <div class="feature-card">
                     <h3>🎨 Visuals</h3>
-                    <p>Glow animations on use, skin support via Masque, and transparency controls for a clean, modern UI integration.</p>
+                    <p>Glow animations on use, skin support via Masque, and transparency controls for a clean, modern UI
+                        integration.</p>
                 </div>
                 <div class="feature-card">
                     <h3>🛠️ ElvUI Support</h3>
-                    <p>Patched specifically to work seamlessly with ElvUI Enhanced on 3.3.5a, preventing common conflicts and errors.</p>
+                    <p>Patched specifically to work seamlessly with ElvUI Enhanced on 3.3.5a, preventing common
+                        conflicts and errors.</p>
                 </div>
             </div>
         </section>
@@ -391,7 +403,8 @@
             <div class="changelog">
                 <h3>v1.5.1 - Options Loading Fix</h3>
                 <ul>
-                    <li>FIXED: Critical issue where Options.lua failed to load in 3.3.5a due to missing WOW_PROJECT_ID definitions.</li>
+                    <li>FIXED: Critical issue where Options.lua failed to load in 3.3.5a due to missing WOW_PROJECT_ID
+                        definitions.</li>
                     <li>FIXED: Typo in Options.lua variable name.</li>
                     <li>FIXED: Syntax errors causing OmniBar to crash on load.</li>
                 </ul>
@@ -409,12 +422,15 @@
                     <li>Version Bump: Incremented version to 1.4.0.</li>
                 </ul>
 
-                 <h3 style="margin-top: 20px;">v1.3.0 - Ascension Compatibility</h3>
+                <h3 style="margin-top: 20px;">v1.3.0 - Ascension Compatibility</h3>
                 <ul>
                     <li>Initialization Overhaul: Removed duplicate functions causing startup errors.</li>
                     <li>Chat Channel Guard: Fixed errors when sending version checks.</li>
                     <li>ElvUI Enhanced Compatibility: Patched AddonsCompatibility.lua conflicts.</li>
                     <li>Ascension Spell Support: Name-based fallback for custom spells.</li>
+                    <li>Shimmed APIs: Added shims for C_PvP, C_Timer, etc.</li>
+                    <li>Tooltip Cleanup: Removed misleading "Hold SHIFT" text.</li>
+                    <li>Scope Fixes: Resolved nil value errors in SPELL_ID_BY_NAME.</li>
                 </ul>
             </div>
         </section>
@@ -426,7 +442,8 @@
 
         <div class="support-links">
             <a href="https://www.patreon.com/Xurkon" class="support-link patreon">❤️ Patreon</a>
-            <a href="https://www.paypal.com/donate?business=kancerous@gmail.com" class="support-link paypal">💙 PayPal</a>
+            <a href="https://www.paypal.com/donate?business=kancerous@gmail.com" class="support-link paypal">💙
+                PayPal</a>
         </div>
     </footer>
 </body>
