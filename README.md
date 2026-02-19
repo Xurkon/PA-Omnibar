@@ -2,7 +2,7 @@
 
 # PA-Omnibar
 
-![Version](https://img.shields.io/badge/version-v1.5.0-blue.svg?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v1.5.1-blue.svg?style=for-the-badge)
 ![Downloads](https://img.shields.io/github/downloads/Xurkon/PA-Omnibar/total?style=for-the-badge&color=e67e22)
 [![Documentation](https://img.shields.io/badge/Documentation-View%20Docs-58a6ff?style=for-the-badge)](https://xurkon.github.io/PA-Omnibar/)
 [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/Xurkon)

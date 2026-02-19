@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.1 - Options Loading Fix
+- **FIXED**: Critical issue where `Options.lua` failed to load in 3.3.5a due to missing `WOW_PROJECT_ID` definitions, causing `/omnibar` slash command to fail.
+- **FIXED**: Typo in `Options.lua` variable name.
+
 ## v1.5.0 - Combat Log Spec Detection & Bug Fixes
 
 ### 🌟 New Features

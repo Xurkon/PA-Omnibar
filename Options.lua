@@ -806,7 +806,7 @@ function OmniBar:AddBarToOptions(key, refresh)
 		end,
 	}
 
-	if WOW_PROJECT_ID_RCE ~= WOW_PROJECT_CLASSIC then
+	if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
 		self.options.args.bars.args[key].args.visibility.args.arena = {
 			name = L["Show in Arena"],
 			desc = L["Show the icons in arena"],

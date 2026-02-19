@@ -41,6 +41,15 @@ local ClearInspectPlayer = ClearInspectPlayer
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local CreateFrame = CreateFrame
 local DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
+
+-- [3.3.5a] Define WOW_PROJECT_ID constants if missing
+if not WOW_PROJECT_ID then
+	WOW_PROJECT_MAINLINE = 1
+	WOW_PROJECT_CLASSIC = 2
+	WOW_PROJECT_BURNING_CRUSADE_CLASSIC = 5
+	WOW_PROJECT_WRATH_CLASSIC = 11
+	WOW_PROJECT_ID = WOW_PROJECT_WRATH_CLASSIC
+end
 -- [Shim] Missing Retail API functions for 3.3.5a compatibility
 local GetArenaOpponentSpec = GetArenaOpponentSpec or function() return nil end
 local GetNumSpecializationsForClassID = GetNumSpecializationsForClassID or function() return 0 end
@@ -63,156 +72,165 @@ local TALENT_TREE_TO_SPEC = {
 
 -- [3.3.5a] Spell name to spec mapping (from Gladdy)
 -- These spells indicate which spec the caster is using
-local SPEC_SPELLS = {
-	-- WARRIOR
-	[GetSpellInfo(47486)] = "Arms",    -- Mortal Strike
-	[GetSpellInfo(46924)] = "Arms",    -- Bladestorm
-	[GetSpellInfo(23881)] = "Fury",    -- Bloodthirst
-	[GetSpellInfo(12809)] = "Protection", -- Concussion Blow
-	[GetSpellInfo(47498)] = "Protection", -- Devastate
-	[GetSpellInfo(46968)] = "Protection", -- Shockwave
+-- [3.3.5a] Safe Spell Name Lookup
+local function AddSpecMapping(table, spellID, spec)
+	local name = GetSpellInfo(spellID)
+	if name then table[name] = spec end
+end
 
-	-- PALADIN
-	[GetSpellInfo(48827)] = "Protection", -- Avenger's Shield
-	[GetSpellInfo(48825)] = "Holy",     -- Holy Shock
-	[GetSpellInfo(53563)] = "Holy",     -- Beacon of Light
-	[GetSpellInfo(35395)] = "Retribution", -- Crusader Strike
-	[GetSpellInfo(66006)] = "Retribution", -- Divine Storm
+-- [3.3.5a] Spell name to spec mapping (from Gladdy)
+-- These spells indicate which spec the caster is using
+local SPEC_SPELLS = {}
 
-	-- ROGUE
-	[GetSpellInfo(48666)] = "Assassination", -- Mutilate
-	[GetSpellInfo(14177)] = "Assassination", -- Cold Blood
-	[GetSpellInfo(51690)] = "Combat",     -- Killing Spree
-	[GetSpellInfo(13877)] = "Combat",     -- Blade Flurry
-	[GetSpellInfo(36554)] = "Subtlety",   -- Shadowstep
-	[GetSpellInfo(51713)] = "Subtlety",   -- Shadow Dance
+-- WARRIOR
+AddSpecMapping(SPEC_SPELLS, 47486, "Arms")    -- Mortal Strike
+AddSpecMapping(SPEC_SPELLS, 46924, "Arms")    -- Bladestorm
+AddSpecMapping(SPEC_SPELLS, 23881, "Fury")    -- Bloodthirst
+AddSpecMapping(SPEC_SPELLS, 12809, "Protection") -- Concussion Blow
+AddSpecMapping(SPEC_SPELLS, 47498, "Protection") -- Devastate
+AddSpecMapping(SPEC_SPELLS, 46968, "Protection") -- Shockwave
 
-	-- PRIEST
-	[GetSpellInfo(53007)] = "Discipline", -- Penance
-	[GetSpellInfo(10060)] = "Discipline", -- Power Infusion
-	[GetSpellInfo(33206)] = "Discipline", -- Pain Suppression
-	[GetSpellInfo(34861)] = "Holy",    -- Circle of Healing
-	[GetSpellInfo(15487)] = "Shadow",  -- Silence
-	[GetSpellInfo(48160)] = "Shadow",  -- Vampiric Touch
+-- PALADIN
+AddSpecMapping(SPEC_SPELLS, 48827, "Protection") -- Avenger's Shield
+AddSpecMapping(SPEC_SPELLS, 48825, "Holy")     -- Holy Shock
+AddSpecMapping(SPEC_SPELLS, 53563, "Holy")     -- Beacon of Light
+AddSpecMapping(SPEC_SPELLS, 35395, "Retribution") -- Crusader Strike
+AddSpecMapping(SPEC_SPELLS, 66006, "Retribution") -- Divine Storm
 
-	-- DEATHKNIGHT
-	[GetSpellInfo(55262)] = "Blood", -- Heart Strike
-	[GetSpellInfo(49203)] = "Frost", -- Hungering Cold
-	[GetSpellInfo(55268)] = "Frost", -- Frost Strike
-	[GetSpellInfo(51411)] = "Frost", -- Howling Blast
-	[GetSpellInfo(55271)] = "Unholy", -- Scourge Strike
+-- ROGUE
+AddSpecMapping(SPEC_SPELLS, 48666, "Assassination") -- Mutilate
+AddSpecMapping(SPEC_SPELLS, 14177, "Assassination") -- Cold Blood
+AddSpecMapping(SPEC_SPELLS, 51690, "Combat")     -- Killing Spree
+AddSpecMapping(SPEC_SPELLS, 13877, "Combat")     -- Blade Flurry
+AddSpecMapping(SPEC_SPELLS, 36554, "Subtlety")   -- Shadowstep
+AddSpecMapping(SPEC_SPELLS, 51713, "Subtlety")   -- Shadow Dance
 
-	-- MAGE
-	[GetSpellInfo(44781)] = "Arcane", -- Arcane Barrage
-	[GetSpellInfo(55360)] = "Fire", -- Living Bomb
-	[GetSpellInfo(42950)] = "Fire", -- Dragon's Breath
-	[GetSpellInfo(44572)] = "Frost", -- Deep Freeze
+-- PRIEST
+AddSpecMapping(SPEC_SPELLS, 53007, "Discipline") -- Penance
+AddSpecMapping(SPEC_SPELLS, 10060, "Discipline") -- Power Infusion
+AddSpecMapping(SPEC_SPELLS, 33206, "Discipline") -- Pain Suppression
+AddSpecMapping(SPEC_SPELLS, 34861, "Holy")    -- Circle of Healing
+AddSpecMapping(SPEC_SPELLS, 15487, "Shadow")  -- Silence
+AddSpecMapping(SPEC_SPELLS, 48160, "Shadow")  -- Vampiric Touch
 
-	-- WARLOCK
-	[GetSpellInfo(59164)] = "Affliction", -- Haunt
-	[GetSpellInfo(47843)] = "Affliction", -- Unstable Affliction
-	[GetSpellInfo(59672)] = "Demonology", -- Metamorphosis
-	[GetSpellInfo(47193)] = "Demonology", -- Demonic Empowerment
-	[GetSpellInfo(59172)] = "Destruction", -- Chaos Bolt
-	[GetSpellInfo(47847)] = "Destruction", -- Shadowfury
+-- DEATHKNIGHT
+AddSpecMapping(SPEC_SPELLS, 55262, "Blood") -- Heart Strike
+AddSpecMapping(SPEC_SPELLS, 49203, "Frost") -- Hungering Cold
+AddSpecMapping(SPEC_SPELLS, 55268, "Frost") -- Frost Strike
+AddSpecMapping(SPEC_SPELLS, 51411, "Frost") -- Howling Blast
+AddSpecMapping(SPEC_SPELLS, 55271, "Unholy") -- Scourge Strike
 
-	-- SHAMAN
-	[GetSpellInfo(59159)] = "Elemental", -- Thunderstorm
-	[GetSpellInfo(16166)] = "Elemental", -- Elemental Mastery
-	[GetSpellInfo(51533)] = "Enhancement", -- Feral Spirit
-	[GetSpellInfo(30823)] = "Enhancement", -- Shamanistic Rage
-	[GetSpellInfo(17364)] = "Enhancement", -- Stormstrike
-	[GetSpellInfo(61301)] = "Restoration", -- Riptide
+-- MAGE
+AddSpecMapping(SPEC_SPELLS, 44781, "Arcane") -- Arcane Barrage
+AddSpecMapping(SPEC_SPELLS, 55360, "Fire") -- Living Bomb
+AddSpecMapping(SPEC_SPELLS, 42950, "Fire") -- Dragon's Breath
+AddSpecMapping(SPEC_SPELLS, 44572, "Frost") -- Deep Freeze
 
-	-- HUNTER
-	[GetSpellInfo(19577)] = "Beast Mastery", -- Intimidation
-	[GetSpellInfo(34490)] = "Marksmanship", -- Silencing Shot
-	[GetSpellInfo(53209)] = "Marksmanship", -- Chimera Shot
-	[GetSpellInfo(60053)] = "Survival",   -- Explosive Shot
-	[GetSpellInfo(49012)] = "Survival",   -- Wyvern Sting
+-- WARLOCK
+AddSpecMapping(SPEC_SPELLS, 59164, "Affliction") -- Haunt
+AddSpecMapping(SPEC_SPELLS, 47843, "Affliction") -- Unstable Affliction
+AddSpecMapping(SPEC_SPELLS, 59672, "Demonology") -- Metamorphosis
+AddSpecMapping(SPEC_SPELLS, 47193, "Demonology") -- Demonic Empowerment
+AddSpecMapping(SPEC_SPELLS, 59172, "Destruction") -- Chaos Bolt
+AddSpecMapping(SPEC_SPELLS, 47847, "Destruction") -- Shadowfury
 
-	-- DRUID
-	[GetSpellInfo(53201)] = "Balance",   -- Starfall
-	[GetSpellInfo(61384)] = "Balance",   -- Typhoon
-	[GetSpellInfo(48566)] = "Feral Combat", -- Mangle (Cat)
-	[GetSpellInfo(48564)] = "Feral Combat", -- Mangle (Bear)
-	[GetSpellInfo(18562)] = "Restoration", -- Swiftmend
-	[GetSpellInfo(53251)] = "Restoration", -- Wild Growth
-	[GetSpellInfo(33891)] = "Restoration", -- Tree of Life
-}
+-- SHAMAN
+AddSpecMapping(SPEC_SPELLS, 59159, "Elemental") -- Thunderstorm
+AddSpecMapping(SPEC_SPELLS, 16166, "Elemental") -- Elemental Mastery
+AddSpecMapping(SPEC_SPELLS, 51533, "Enhancement") -- Feral Spirit
+AddSpecMapping(SPEC_SPELLS, 30823, "Enhancement") -- Shamanistic Rage
+AddSpecMapping(SPEC_SPELLS, 17364, "Enhancement") -- Stormstrike
+AddSpecMapping(SPEC_SPELLS, 61301, "Restoration") -- Riptide
+
+-- HUNTER
+AddSpecMapping(SPEC_SPELLS, 19577, "Beast Mastery") -- Intimidation
+AddSpecMapping(SPEC_SPELLS, 34490, "Marksmanship") -- Silencing Shot
+AddSpecMapping(SPEC_SPELLS, 53209, "Marksmanship") -- Chimera Shot
+AddSpecMapping(SPEC_SPELLS, 60053, "Survival")   -- Explosive Shot
+AddSpecMapping(SPEC_SPELLS, 49012, "Survival")   -- Wyvern Sting
+
+-- DRUID
+AddSpecMapping(SPEC_SPELLS, 53201, "Balance")   -- Starfall
+AddSpecMapping(SPEC_SPELLS, 61384, "Balance")   -- Typhoon
+AddSpecMapping(SPEC_SPELLS, 48566, "Feral Combat") -- Mangle (Cat)
+AddSpecMapping(SPEC_SPELLS, 48564, "Feral Combat") -- Mangle (Bear)
+AddSpecMapping(SPEC_SPELLS, 18562, "Restoration") -- Swiftmend
+AddSpecMapping(SPEC_SPELLS, 53251, "Restoration") -- Wild Growth
+AddSpecMapping(SPEC_SPELLS, 33891, "Restoration") -- Tree of Life
+
 
 -- [3.3.5a] Buff/debuff name to spec mapping (from Gladdy)
 -- These auras indicate which spec the unit has
-local SPEC_BUFFS = {
-	-- WARRIOR
-	[GetSpellInfo(56638)] = "Arms",    -- Taste for Blood
-	[GetSpellInfo(52437)] = "Arms",    -- Sudden Death
-	[GetSpellInfo(56112)] = "Fury",    -- Furious Attacks
-	[GetSpellInfo(50227)] = "Protection", -- Sword and Board
+local SPEC_BUFFS = {}
 
-	-- PALADIN
-	[GetSpellInfo(20375)] = "Retribution", -- Seal of Command
-	[GetSpellInfo(59578)] = "Retribution", -- The Art of War
-	[GetSpellInfo(31836)] = "Holy",     -- Light's Grace
-	[GetSpellInfo(54149)] = "Holy",     -- Infusion of Light
+-- WARRIOR
+AddSpecMapping(SPEC_BUFFS, 56638, "Arms")    -- Taste for Blood
+AddSpecMapping(SPEC_BUFFS, 52437, "Arms")    -- Sudden Death
+AddSpecMapping(SPEC_BUFFS, 56112, "Fury")    -- Furious Attacks
+AddSpecMapping(SPEC_BUFFS, 50227, "Protection") -- Sword and Board
 
-	-- ROGUE
-	[GetSpellInfo(36554)] = "Subtlety",   -- Shadowstep
-	[GetSpellInfo(51713)] = "Subtlety",   -- Shadow Dance
-	[GetSpellInfo(31665)] = "Subtlety",   -- Master of Subtlety
-	[GetSpellInfo(51690)] = "Combat",     -- Killing Spree
-	[GetSpellInfo(13877)] = "Combat",     -- Blade Flurry
-	[GetSpellInfo(14177)] = "Assassination", -- Cold Blood
+-- PALADIN
+AddSpecMapping(SPEC_BUFFS, 20375, "Retribution") -- Seal of Command
+AddSpecMapping(SPEC_BUFFS, 59578, "Retribution") -- The Art of War
+AddSpecMapping(SPEC_BUFFS, 31836, "Holy")     -- Light's Grace
+AddSpecMapping(SPEC_BUFFS, 54149, "Holy")     -- Infusion of Light
 
-	-- PRIEST
-	[GetSpellInfo(47788)] = "Holy",    -- Guardian Spirit
-	[GetSpellInfo(52800)] = "Discipline", -- Borrowed Time
-	[GetSpellInfo(47930)] = "Discipline", -- Grace
-	[GetSpellInfo(47753)] = "Discipline", -- Divine Aegis
-	[GetSpellInfo(15473)] = "Shadow",  -- Shadowform
-	[GetSpellInfo(15286)] = "Shadow",  -- Vampiric Embrace
+-- ROGUE
+AddSpecMapping(SPEC_BUFFS, 36554, "Subtlety")   -- Shadowstep
+AddSpecMapping(SPEC_BUFFS, 51713, "Subtlety")   -- Shadow Dance
+AddSpecMapping(SPEC_BUFFS, 31665, "Subtlety")   -- Master of Subtlety
+AddSpecMapping(SPEC_BUFFS, 51690, "Combat")     -- Killing Spree
+AddSpecMapping(SPEC_BUFFS, 13877, "Combat")     -- Blade Flurry
+AddSpecMapping(SPEC_BUFFS, 14177, "Assassination") -- Cold Blood
 
-	-- DEATHKNIGHT
-	[GetSpellInfo(49222)] = "Unholy", -- Bone Shield
-	[GetSpellInfo(49016)] = "Blood", -- Hysteria
-	[GetSpellInfo(55610)] = "Frost", -- Imp. Icy Talons
+-- PRIEST
+AddSpecMapping(SPEC_BUFFS, 47788, "Holy")    -- Guardian Spirit
+AddSpecMapping(SPEC_BUFFS, 52800, "Discipline") -- Borrowed Time
+AddSpecMapping(SPEC_BUFFS, 47930, "Discipline") -- Grace
+AddSpecMapping(SPEC_BUFFS, 47753, "Discipline") -- Divine Aegis
+AddSpecMapping(SPEC_BUFFS, 15473, "Shadow")  -- Shadowform
+AddSpecMapping(SPEC_BUFFS, 15286, "Shadow")  -- Vampiric Embrace
 
-	-- MAGE
-	[GetSpellInfo(43039)] = "Frost", -- Ice Barrier
-	[GetSpellInfo(74396)] = "Frost", -- Fingers of Frost
-	[GetSpellInfo(11129)] = "Fire", -- Combustion
-	[GetSpellInfo(48108)] = "Fire", -- Hot Streak
-	[GetSpellInfo(31583)] = "Arcane", -- Arcane Empowerment
+-- DEATHKNIGHT
+AddSpecMapping(SPEC_BUFFS, 49222, "Unholy") -- Bone Shield
+AddSpecMapping(SPEC_BUFFS, 49016, "Blood") -- Hysteria
+AddSpecMapping(SPEC_BUFFS, 55610, "Frost") -- Imp. Icy Talons
 
-	-- WARLOCK
-	[GetSpellInfo(30302)] = "Destruction", -- Nether Protection
-	[GetSpellInfo(54277)] = "Destruction", -- Backdraft
-	[GetSpellInfo(47193)] = "Demonology", -- Demonic Empowerment
-	[GetSpellInfo(64371)] = "Affliction", -- Eradication
+-- MAGE
+AddSpecMapping(SPEC_BUFFS, 43039, "Frost") -- Ice Barrier
+AddSpecMapping(SPEC_BUFFS, 74396, "Frost") -- Fingers of Frost
+AddSpecMapping(SPEC_BUFFS, 11129, "Fire") -- Combustion
+AddSpecMapping(SPEC_BUFFS, 48108, "Fire") -- Hot Streak
+AddSpecMapping(SPEC_BUFFS, 31583, "Arcane") -- Arcane Empowerment
 
-	-- SHAMAN
-	[GetSpellInfo(57663)] = "Elemental", -- Totem of Wrath
-	[GetSpellInfo(51470)] = "Elemental", -- Elemental Oath
-	[GetSpellInfo(49284)] = "Restoration", -- Earth Shield
-	[GetSpellInfo(53390)] = "Restoration", -- Tidal Waves
-	[GetSpellInfo(30809)] = "Enhancement", -- Unleashed Rage
-	[GetSpellInfo(53817)] = "Enhancement", -- Maelstrom Weapon
+-- WARLOCK
+AddSpecMapping(SPEC_BUFFS, 30302, "Destruction") -- Nether Protection
+AddSpecMapping(SPEC_BUFFS, 54277, "Destruction") -- Backdraft
+AddSpecMapping(SPEC_BUFFS, 47193, "Demonology") -- Demonic Empowerment
+AddSpecMapping(SPEC_BUFFS, 64371, "Affliction") -- Eradication
 
-	-- HUNTER
-	[GetSpellInfo(20895)] = "Beast Mastery", -- Spirit Bond
-	[GetSpellInfo(34471)] = "Beast Mastery", -- The Beast Within
-	[GetSpellInfo(19506)] = "Marksmanship", -- Trueshot Aura
-	[GetSpellInfo(64420)] = "Survival",   -- Sniper Training
+-- SHAMAN
+AddSpecMapping(SPEC_BUFFS, 57663, "Elemental") -- Totem of Wrath
+AddSpecMapping(SPEC_BUFFS, 51470, "Elemental") -- Elemental Oath
+AddSpecMapping(SPEC_BUFFS, 49284, "Restoration") -- Earth Shield
+AddSpecMapping(SPEC_BUFFS, 53390, "Restoration") -- Tidal Waves
+AddSpecMapping(SPEC_BUFFS, 30809, "Enhancement") -- Unleashed Rage
+AddSpecMapping(SPEC_BUFFS, 53817, "Enhancement") -- Maelstrom Weapon
 
-	-- DRUID
-	[GetSpellInfo(24932)] = "Feral Combat", -- Leader of the Pack
-	[GetSpellInfo(16975)] = "Feral Combat", -- Predatory Strikes
-	[GetSpellInfo(24907)] = "Balance",   -- Moonkin Aura
-	[GetSpellInfo(24858)] = "Balance",   -- Moonkin Form
-	[GetSpellInfo(48504)] = "Restoration", -- Living Seed
-	[GetSpellInfo(53251)] = "Restoration", -- Wild Growth
-	[GetSpellInfo(33891)] = "Restoration", -- Tree of Life
-}
+-- HUNTER
+AddSpecMapping(SPEC_BUFFS, 20895, "Beast Mastery") -- Spirit Bond
+AddSpecMapping(SPEC_BUFFS, 34471, "Beast Mastery") -- The Beast Within
+AddSpecMapping(SPEC_BUFFS, 19506, "Marksmanship") -- Trueshot Aura
+AddSpecMapping(SPEC_BUFFS, 64420, "Survival")   -- Sniper Training
+
+-- DRUID
+AddSpecMapping(SPEC_BUFFS, 24932, "Feral Combat") -- Leader of the Pack
+AddSpecMapping(SPEC_BUFFS, 16975, "Feral Combat") -- Predatory Strikes
+AddSpecMapping(SPEC_BUFFS, 24907, "Balance")   -- Moonkin Aura
+AddSpecMapping(SPEC_BUFFS, 24858, "Balance")   -- Moonkin Form
+AddSpecMapping(SPEC_BUFFS, 48504, "Restoration") -- Living Seed
+AddSpecMapping(SPEC_BUFFS, 53251, "Restoration") -- Wild Growth
+AddSpecMapping(SPEC_BUFFS, 33891, "Restoration") -- Tree of Life
 
 
 -- [3.3.5a] Get player's current spec based on talent points
@@ -505,7 +523,9 @@ function OmniBar:SendVersion(distribution)
 	if (not self.version) or self.version.major == 0 then return end
 	local channel = distribution or GetDefaultCommChannel()
 	if channel then
-`t`t-- [3.3.5a Fix] Don't send to GUILD if not in a guild`r`n`t`tif channel == "GUILD" and not IsInGuild() then return end`r`n`t`tself:SendCommMessage("OmniBarVersion", self.version.string, channel)
+		-- [3.3.5a Fix] Don't send to GUILD if not in a guild
+		if channel == "GUILD" and not IsInGuild() then return end
+		self:SendCommMessage("OmniBarVersion", self.version.string, channel)
 	end
 end
 
