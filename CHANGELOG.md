@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.5.3 - Chat Type Fix (Complete)
+- **FIXED**: "Unknown addon chat type" error persisting after v1.5.2. Root cause: `ZONE_CHANGED_NEW_AREA` was registered as a `SendVersion` event handler, causing the event name to be passed as the channel argument. The prior string-equality guard could still be bypassed. Fix: removed the `ZONE_CHANGED_NEW_AREA` registration entirely and replaced the guard with a channel whitelist (`RAID`, `PARTY`, `GUILD`, `WHISPER`) so no invalid string can ever reach `SendCommMessage`.
+
 ## v1.5.2 - Chat Type Fix
 - **FIXED**: "Unknown addon chat type" error caused by `ZONE_CHANGED_NEW_AREA` event passing its name as a chat channel argument to `SendVersion`.
 

@@ -465,11 +465,9 @@ function OmniBar:OnInitialize()
 	-- Check if update available
 	if self.version.major > 0 then
 		self:RegisterComm("OmniBarVersion", "ReceiveVersion")
-		self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "SendVersion")
 		C_Timer_After(10, function()
 			self:SendVersion()
 			if IsInGuild() then self:SendVersion("GUILD") end
-			--self:SendVersion("YELL")
 		end)
 	end
 
@@ -520,11 +518,10 @@ function OmniBar:ReceiveVersion(_, payload, _, sender)
 end
 
 function OmniBar:SendVersion(distribution)
-	if distribution == "ZONE_CHANGED_NEW_AREA" then distribution = nil end
 	if (not self.version) or self.version.major == 0 then return end
-	local channel = distribution or GetDefaultCommChannel()
+	local validChannels = { RAID = true, PARTY = true, GUILD = true, WHISPER = true }
+	local channel = validChannels[distribution] and distribution or GetDefaultCommChannel()
 	if channel then
-		-- [3.3.5a Fix] Don't send to GUILD if not in a guild
 		if channel == "GUILD" and not IsInGuild() then return end
 		self:SendCommMessage("OmniBarVersion", self.version.string, channel)
 	end
