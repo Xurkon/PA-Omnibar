@@ -342,7 +342,7 @@
         <p class="subtitle">Advanced Enemy Cooldown Tracker for Project Ascension (3.3.5a)</p>
 
         <div class="badges">
-            <span class="badge version">v1.5.1</span>
+            <span class="badge version">v1.5.4</span>
             <span class="badge wow">WotLK 3.3.5a</span>
             <span class="badge platform">Ascension</span>
         </div>
@@ -401,7 +401,14 @@
         <section>
             <h2>Checklist</h2>
             <div class="changelog">
-                <h3>v1.5.1 - Options Loading Fix</h3>
+                <h3>v1.5.4 - Cooldowns Initialization Fix</h3>
+                <ul>
+                    <li>FIXED: `bad argument #1 to 'pairs' (table expected, got nil)` error when running OmniBar.</li>
+                    <li>Root Cause: The expansion-specific data files (e.g. `OmniBar_Wrath.lua`) were using an undefined variable `WOW_PROJECT_ID_RCE` instead of `WOW_PROJECT_ID` for their expansion checks, causing them to return early and leave `addon.Cooldowns` uninitialized.</li>
+                    <li>Fix: Added `WOW_PROJECT_ID` initialization logic to the top of all expansion-specific Lua files and corrected the checks to use `WOW_PROJECT_ID`.</li>
+                </ul>
+
+                <h3 style="margin-top: 20px;">v1.5.1 - Options Loading Fix</h3>
                 <ul>
                     <li>FIXED: Critical issue where Options.lua failed to load in 3.3.5a due to missing WOW_PROJECT_ID definitions, causing /omnibar slash command to fail.</li>
                     <li>FIXED: Typo in Options.lua variable name.</li>

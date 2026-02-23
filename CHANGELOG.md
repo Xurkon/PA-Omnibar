@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.5.4 - Cooldowns Initialization Fix
+- **FIXED**: `bad argument #1 to 'pairs' (table expected, got nil)` error when running OmniBar.
+- **Root Cause**: The expansion-specific data files (e.g. `OmniBar_Wrath.lua`) were using an undefined variable `WOW_PROJECT_ID_RCE` instead of `WOW_PROJECT_ID` for their expansion checks, causing them to return early and leave `addon.Cooldowns` uninitialized.
+- **Fix**: Added `WOW_PROJECT_ID` initialization logic to the top of all expansion-specific Lua files and corrected the checks to use `WOW_PROJECT_ID`.
+
 ## v1.5.3 - Chat Type Fix (Complete)
 - **FIXED**: "Unknown addon chat type" error persisting after v1.5.2. Root cause: `ZONE_CHANGED_NEW_AREA` was registered as a `SendVersion` event handler, causing the event name to be passed as the channel argument. The prior string-equality guard could still be bypassed. Fix: removed the `ZONE_CHANGED_NEW_AREA` registration entirely and replaced the guard with a channel whitelist (`RAID`, `PARTY`, `GUILD`, `WHISPER`) so no invalid string can ever reach `SendCommMessage`.
 

@@ -2,7 +2,7 @@
 
 # PA-Omnibar
 
-![Version](https://img.shields.io/badge/version-v1.5.1-blue.svg?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v1.5.4-blue.svg?style=for-the-badge)
 ![Downloads](https://img.shields.io/github/downloads/Xurkon/PA-Omnibar/total?style=for-the-badge&color=e67e22)
 [![Documentation](https://img.shields.io/badge/Documentation-View%20Docs-58a6ff?style=for-the-badge)](https://xurkon.github.io/PA-Omnibar/)
 [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/Xurkon)
@@ -54,6 +54,11 @@
 ## 📜 Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
+
+### v1.5.4 - Cooldowns Initialization Fix
+- **FIXED**: `bad argument #1 to 'pairs' (table expected, got nil)` error when running OmniBar.
+- **Root Cause**: The expansion-specific data files (e.g. `OmniBar_Wrath.lua`) were using an undefined variable `WOW_PROJECT_ID_RCE` instead of `WOW_PROJECT_ID` for their expansion checks, causing them to return early and leave `addon.Cooldowns` uninitialized.
+- **Fix**: Added `WOW_PROJECT_ID` initialization logic to the top of all expansion-specific Lua files and corrected the checks to use `WOW_PROJECT_ID`.
 
 ### v1.5.0 - Combat Log Spec Detection
 - **ADDED**: Advanced combat log-based spec detection for arena/PvP.
